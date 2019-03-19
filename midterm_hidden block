@@ -1,0 +1,130 @@
+function setup() {
+  createCanvas(600, 300);
+}
+
+var playerleftSpeed = 10;
+var playerrightSpeed = 10;
+var playerJump = 22;
+var playerX = 0;
+var playerY = 240;
+var gravity = 10;
+var blockX = 350;
+var blockY = 210;    
+var size = 40;
+var ground = 240;
+var blockColor = 0;
+var colorChange = 36;
+var jump1 = true;
+var jump2 = true;
+var jump3 = false;
+
+function preload() {
+  soundFormats('wav');
+  beep1 = loadSound('Beep1.wav');
+  beep2 = loadSound('Beep2.wav');
+  beep3 = loadSound('Beep3.wav');
+}
+
+function draw() {
+  background(0);
+  fill(255);
+
+  //draw cube
+  stroke(255);
+  strokeWeight(1);
+  rect(playerX, playerY, 10, 10);
+  line(0, 250, width, 250);
+  line(0, 50, width, 50);
+
+  fill(blockColor);
+  noStroke();
+  if (blockColor >= 255) {
+    blockColor = 0;
+    if (jump3 == false) {
+        beep3.play();
+        blockX = random(0, 540);
+        jump3 = true;
+      }
+  }
+  rect(blockX, blockY, size, 250 - blockY);
+
+  playerY += gravity;
+  //move
+  if (keyIsDown(65)) {
+    playerX -= playerleftSpeed;
+  }
+  if (keyIsDown(68)) {
+    playerX += playerrightSpeed;
+  }
+  //if (keyIsDown(32)) {
+    playerY -= playerJump;
+    playerJump -= 1;
+    jump1 = false;
+    jump2 = false;
+    jump3 = false;
+  //}
+
+  //reset jump height
+  if (playerY >= ground) {
+    playerJump = 22;
+    if (playerX <= blockX - 10 || playerX >= blockX + size) {
+      if (jump1 == false) {
+        beep1.play();
+        jump1 = true;
+      }
+    }
+  }
+  //limit the cube in the frame
+  if (playerY <= 50) {
+    playerY = 50;
+  }
+  if (playerY >= ground - 1) {
+    playerY = ground;
+  }
+  if (playerX <= 0) {
+    playerX = 0;
+  }
+  if (playerX >= width) {
+    playerX = width - 10;
+  }
+  //when cube touch block
+  if (playerY > blockY - 10) {
+    if (playerX < blockX - 9 && playerX > blockX - 10) {
+      playerX = blockX - 10;
+      playerrightSpeed = 0;
+      blockColor += colorChange;
+      colorChange = 0;
+    }
+    if (playerX < blockX - 10) {
+      playerrightSpeed = 10;
+      colorChange = 36;
+    }
+    if (playerX > blockX + size - 1 && playerX < blockX + size) {
+      playerX = blockX + size;
+      playerleftSpeed = 0;
+      blockColor += colorChange;
+      colorChange = 0;
+    }
+    if (playerX > blockX + size) {
+      playerleftSpeed = 10;
+      colorChange = 36;
+    }
+  }
+  if (playerY < blockY - 10) {
+    playerrightSpeed = 10;
+    playerleftSpeed = 10;
+    colorChange = 36;
+  }
+  // cube stands on the block
+  if (playerY >= blockY - 10 && playerX > blockX - 10 && playerX < blockX + size) {
+    ground -= ground - blockY + 10;
+    blockColor += colorChange;
+    colorChange = 0;
+    if (jump2 == false) {
+      beep2.play();
+      jump2 = true;
+    }
+  }
+  if (playerX < blockX - 10 || playerX > blockX + size) {
+    ground = 240;
+  }
